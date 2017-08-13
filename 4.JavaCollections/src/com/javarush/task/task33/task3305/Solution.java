@@ -1,6 +1,6 @@
 package com.javarush.task.task33.task3305;
 
-//import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -26,8 +26,8 @@ public class Solution {
 
     public static void convertToJson(Parking parking) throws IOException {
         StringWriter writer = new StringWriter();
-        /*ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(writer, parking);*/
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writerWithDefaultPrettyPrinter().writeValue(writer, parking);
         System.out.println(writer.toString());
     }
 }
