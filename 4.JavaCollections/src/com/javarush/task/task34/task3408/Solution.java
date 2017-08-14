@@ -16,6 +16,9 @@ public class Solution {
         Cache<SomeKey, SomeValue> cache = new Cache<>();
         cache.put(value);
 
+        //value = new SomeValue(someKeyNew);
+        //cache.put(value);
+
         SomeValue valueFromCacheExisted = cache.getByKey(someKey, SomeValue.class);
         System.out.println(valueFromCacheExisted);
 

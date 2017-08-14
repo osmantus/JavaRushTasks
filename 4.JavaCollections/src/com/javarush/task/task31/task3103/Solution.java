@@ -17,7 +17,7 @@ public class Solution {
 
     public static List<String> readLines(String fileName) throws IOException
     {
-        return Files.readAllLines(Paths.get(fileName));
+        return Files.readAllLines(Paths.get(fileName), Charset.defaultCharset());
     }
 
     public static void writeBytes(String fileName, byte[] bytes) throws IOException
