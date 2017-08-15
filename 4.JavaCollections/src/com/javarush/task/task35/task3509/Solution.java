@@ -11,18 +11,28 @@ public class Solution {
     public static void main(String[] args) {
     }
 
-    public static ArrayList newArrayList(Object... elements) {
+    public static <T> ArrayList newArrayList(Object... elements) {
         //напишите тут ваш код
-        return null
+        ArrayList<T> list = new ArrayList<>();
+        return list;
     }
 
-    public static HashSet newHashSet(Object... elements) {
+    public static <T> HashSet newHashSet(Object... elements) {
         //напишите тут ваш код
-        return null
+        HashSet<T> set = new HashSet<>();
+        return set;
     }
 
-    public static HashMap newHashMap(List keys, List values) {
+    public static <K, V> HashMap newHashMap(List<? extends K> keys, List<? extends V> values) {
         //напишите тут ваш код
-        return null;
+
+        if (keys.size() == values.size())
+        {
+            HashMap<K, V> map = new HashMap<>();
+            return map;
+        }
+        else {
+            throw new IllegalArgumentException();
+        }
     }
 }
