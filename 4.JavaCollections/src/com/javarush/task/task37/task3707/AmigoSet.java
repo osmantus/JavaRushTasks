@@ -1,10 +1,7 @@
 package com.javarush.task.task37.task3707;
 
 import java.io.Serializable;
-import java.util.AbstractSet;
-import java.util.Iterator;
-import java.util.Set;
-//import java.util.Spliterator;
+import java.util.*;
 
 /**
  * Created by Alex on 27.03.2017.
@@ -15,11 +12,11 @@ public class AmigoSet<E> extends AbstractSet<E> implements Serializable, Cloneab
     {
     }
 
-    /*@Override
+    @Override
     public Spliterator spliterator()
     {
         return null;
-    }*/
+    }
 
     @Override
     public Iterator iterator()
@@ -31,5 +28,20 @@ public class AmigoSet<E> extends AbstractSet<E> implements Serializable, Cloneab
     public int size()
     {
         return 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        return super.removeAll(c);
     }
 }

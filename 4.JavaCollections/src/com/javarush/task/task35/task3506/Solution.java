@@ -3,19 +3,16 @@ package com.javarush.task.task35.task3506;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-/* 
-Wildcards
-*/
+
 public class Solution {
 
-    public static <D, H extends D, S extends H> void add(List<D> destinationList, List<S> sourceList) {
-        ListIterator<D> destListIterator = destinationList.listIterator();
-        ListIterator<S> srcListIterator = sourceList.listIterator();
+    public static <T> void add(List<? super T> destinationList, List<? extends T> sourceList) {
+        ListIterator<? super T> destListIterator = destinationList.listIterator();
+        ListIterator<? extends T> srcListIterator = sourceList.listIterator();
         for (int i = 0; i < sourceList.size(); i++) {
             destListIterator.add(srcListIterator.next());
         }
     }
-
 
     public static void main(String[] args) {
         List<B> destination = new ArrayList<>();
@@ -25,11 +22,6 @@ public class Solution {
         add(destination, source);
         System.out.println(destination);
         System.out.println(source);
-
-        /*
-[com.javarush.test.level39.lesson08.task01.Solution$C@203b4f0e, com.javarush.test.level39.lesson08.task01.Solution$B@15c330aa]
-[com.javarush.test.level39.lesson08.task01.Solution$C@203b4f0e]
-         */
     }
 
     static class A {
