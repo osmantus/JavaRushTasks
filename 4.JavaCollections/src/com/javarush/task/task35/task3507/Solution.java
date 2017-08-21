@@ -1,8 +1,10 @@
 package com.javarush.task.task35.task3507;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,47 +22,51 @@ public class Solution {
 
     public static Set<? extends Animal> getAllAnimals(String pathToAnimals) {
 
-        Set<? extends Animal> resultingSet = new HashSet<>();
+        Set<Animal> resultingSet = new HashSet<>();
 
         File folder = new File(pathToAnimals);
-        File[] listOfFiles = folder.listFiles();
+
+        File[] listOfFiles = new File(pathToAnimals).listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.isFile() && pathname.getName().toLowerCase().endsWith(".class");
+            }
+        });
+
         String[] classNames = new String[listOfFiles.length];
-        String withoutSuffix = "";
+        String classNameWithoutSuffix = "";
         ClassLoader clldr = null;
-        Class<?> cl = null;
+        Class cl = null;
 
         for (int i = 0; i < listOfFiles.length; i++) {
             classNames[i] = listOfFiles[i].getName();
             try {
-                withoutSuffix = classNames[i].split("\\.class")[0];
+                classNameWithoutSuffix = classNames[i].split("\\.class")[0];
                 clldr = Thread.currentThread().getContextClassLoader();
-                //cl = clldr.loadClass(Solution.class.getPackage().getName() + "." + "data." + withoutSuffix);
-                String packageName = Solution.class.getPackage().getName() + "." + "data";
-                cl = new ClassFromPath().load(listOfFiles[i].toPath(), packageName);
 
-                if (Animal.class.isAssignableFrom(cl.getClass()))
-                {
-                    for (Constructor<?> constructor : cl.getConstructors())
-                    {
-                        if (constructor.getParameterTypes().length == 0)
-                        {
-                            Object obj = cl.newInstance();
+                String packageName = Solution.class.getPackage().getName() + "." + "data";
+                Path path = listOfFiles[i].toPath();
+                cl = new ClassFromPath().load(path, packageName);
+
+                for (Class iface : cl.getInterfaces()) {
+                    if (iface.getSimpleName().equals("Animal")) {
+                        for (Constructor constructor : cl.getConstructors()) {
+                            if (Modifier.isPublic(constructor.getModifiers()) && constructor.getParameterTypes().length == 0) {
+                                resultingSet.add((Animal) cl.newInstance());
+                                break;
+                            }
                         }
+                        break;
                     }
                 }
-
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
             }
         }
 
-        Class<? extends Animal> classObj = null;
-
-        return null;
+        return resultingSet;
     }
 
     public static class ClassFromPath extends ClassLoader {
@@ -68,7 +74,7 @@ public class Solution {
             try {
                 String className = packageName + "." + path.getFileName().toString().replace(".class", "");
                 byte[] b = Files.readAllBytes(path);
-                return defineClass(className, b, 0, b.length); //here main magic
+                return defineClass(className, b, 0, b.length);
             } catch (IOException e) {
                 e.printStackTrace();
             }
