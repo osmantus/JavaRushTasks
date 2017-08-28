@@ -10,8 +10,8 @@ import org.junit.Test;
  */
 public class FunctionalTest {
 
-    public void testStorage(Shortener shortener) {
-
+    public void testStorage(Shortener shortener)
+    {
         String string1 = "1";
         String string2 = "2";
         String string3 = "1";
@@ -34,32 +34,50 @@ public class FunctionalTest {
     }
 
     @Test
-    public void testHashMapStorageStrategy() {
-        testStorage(new Shortener(new HashMapStorageStrategy()));
+    public void testHashMapStorageStrategy()
+    {
+        Shortener shortener = new Shortener(new HashMapStorageStrategy());
+        //testStorage(new Shortener(new HashMapStorageStrategy()));
+        testStorage(shortener);
     }
 
     @Test
-    public void testOurHashMapStorageStrategy() {
-        testStorage(new Shortener(new OurHashMapStorageStrategy()));
+    public void testOurHashMapStorageStrategy()
+    {
+        Shortener shortener = new Shortener(new OurHashMapStorageStrategy());
+        //testStorage(new Shortener(new OurHashMapStorageStrategy()));
+        testStorage(shortener);
     }
 
     @Test
-    public void testFileStorageStrategy() {
-        testStorage(new Shortener(new FileStorageStrategy()));
+    public void testFileStorageStrategy()
+    {
+        Shortener shortener = new Shortener(new FileStorageStrategy());
+        //testStorage(new Shortener(new FileStorageStrategy()));
+        testStorage(shortener);
     }
 
     @Test
-    public void testHashBiMapStorageStrategy() {
-        testStorage(new Shortener(new HashBiMapStorageStrategy()));
+    public void testHashBiMapStorageStrategy()
+    {
+        Shortener shortener = new Shortener(new HashBiMapStorageStrategy());
+        //testStorage(new Shortener(new HashBiMapStorageStrategy()));
+        testStorage(shortener);
     }
 
     @Test
-    public void testDualHashBidiMapStorageStrategy() {
-        testStorage(new Shortener(new DualHashBidiMapStorageStrategy()));
+    public void testDualHashBidiMapStorageStrategy()
+    {
+        Shortener shortener = new Shortener(new DualHashBidiMapStorageStrategy());
+        //testStorage(new Shortener(new DualHashBidiMapStorageStrategy()));
+        testStorage(shortener);
     }
 
     @Test
-    public void testOurHashBiMapStorageStrategy() {
-        testStorage(new Shortener(new OurHashBiMapStorageStrategy()));
+    public void testOurHashBiMapStorageStrategy()
+    {
+        Shortener shortener = new Shortener(new OurHashBiMapStorageStrategy());
+        //testStorage(new Shortener(new OurHashBiMapStorageStrategy()));
+        testStorage(shortener);
     }
 }
