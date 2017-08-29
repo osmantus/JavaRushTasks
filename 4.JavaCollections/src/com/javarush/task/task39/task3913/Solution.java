@@ -10,6 +10,6 @@ public class Solution {
         System.out.println(logParser.getUniqueIPs(null, new Date()));
         System.out.println(logParser.getIPsForUser("Amigo", null, new Date()));
         System.out.println(logParser.getIPsForEvent(Event.DONE_TASK, null, new Date()));
-        //System.out.println(logParser.getIPsForEvent(Status.OK, null, new Date()));
+        System.out.println(logParser.getIPsForStatus(Status.OK, null, new Date()));
     }
 }

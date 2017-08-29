@@ -15,11 +15,30 @@ import java.util.*;
 
 public class LogParser implements IPQuery {
 
-    private List<Path> logFiles;
+    //private List<Path> logFiles;
+    private Path logDir;
 
     public LogParser(Path logDir) {
 
-        logFiles = new ArrayList<>();
+        this.logDir = logDir;
+
+        /*logFiles = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
+            for (Path entry: stream) {
+                logFiles.add(entry);
+            }
+        } catch (DirectoryIteratorException ex) {
+            // I/O error encounted during the iteration, the cause is an IOException
+            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+    }
+
+    @Override
+    public int getNumberOfUniqueIPs(Date after, Date before) {
+
+        List<Path> logFiles = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
             for (Path entry: stream) {
                 logFiles.add(entry);
@@ -30,10 +49,6 @@ public class LogParser implements IPQuery {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public int getNumberOfUniqueIPs(Date after, Date before) {
 
         if (logFiles.size() == 0)
             return 0;
@@ -111,6 +126,18 @@ public class LogParser implements IPQuery {
     @Override
     public Set<String> getUniqueIPs(Date after, Date before) {
 
+        List<Path> logFiles = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
+            for (Path entry: stream) {
+                logFiles.add(entry);
+            }
+        } catch (DirectoryIteratorException ex) {
+            // I/O error encounted during the iteration, the cause is an IOException
+            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (logFiles.size() == 0)
             return null;
 
@@ -171,6 +198,19 @@ public class LogParser implements IPQuery {
 
     @Override
     public Set<String> getIPsForUser(String user, Date after, Date before) {
+
+        List<Path> logFiles = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
+            for (Path entry: stream) {
+                logFiles.add(entry);
+            }
+        } catch (DirectoryIteratorException ex) {
+            // I/O error encounted during the iteration, the cause is an IOException
+            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (logFiles.size() == 0)
             return null;
 
@@ -233,6 +273,19 @@ public class LogParser implements IPQuery {
 
     @Override
     public Set<String> getIPsForEvent(Event event, Date after, Date before) {
+
+        List<Path> logFiles = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
+            for (Path entry: stream) {
+                logFiles.add(entry);
+            }
+        } catch (DirectoryIteratorException ex) {
+            // I/O error encounted during the iteration, the cause is an IOException
+            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (logFiles.size() == 0)
             return null;
 
@@ -264,7 +317,7 @@ public class LogParser implements IPQuery {
                         {
                             ip = fields[0];
                             dateTime = fields[2];
-                            eventStr = fields[3];
+                            eventStr = fields[3].trim();
                             if (eventStr.contains(" "))
                                 eventStr = eventStr.split(" ")[0];
                             eventVar = Event.valueOf(eventStr);
@@ -299,6 +352,19 @@ public class LogParser implements IPQuery {
 
     @Override
     public Set<String> getIPsForStatus(Status status, Date after, Date before) {
+
+        List<Path> logFiles = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
+            for (Path entry: stream) {
+                logFiles.add(entry);
+            }
+        } catch (DirectoryIteratorException ex) {
+            // I/O error encounted during the iteration, the cause is an IOException
+            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         if (logFiles.size() == 0)
             return null;
 
@@ -330,9 +396,7 @@ public class LogParser implements IPQuery {
                         {
                             ip = fields[0];
                             dateTime = fields[2];
-                            statusStr = fields[3];
-                            if (statusStr.contains(" "))
-                                statusStr = statusStr.split(" ")[0];
+                            statusStr = fields[4].trim();
                             statusVar = Status.valueOf(statusStr);
 
                             if (statusVar.name().equals(status.name())) {
