@@ -1,6 +1,9 @@
 package com.javarush.task.task39.task3913;
 
+import com.javarush.task.task39.task3913.query.DateQuery;
+import com.javarush.task.task39.task3913.query.EventQuery;
 import com.javarush.task.task39.task3913.query.IPQuery;
+import com.javarush.task.task39.task3913.query.UserQuery;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,9 +15,10 @@ import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 
-public class LogParser implements IPQuery {
+public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
 
     //private List<Path> logFiles;
     private Path logDir;
@@ -126,9 +130,12 @@ public class LogParser implements IPQuery {
     // проверка, попадает ли дата в интервал
     private boolean isDateFromInterval(Date current, Date after, Date before){
         boolean result = false;
-        if (after == null) after = current;
-        if (before == null) before = current;
-        if ((current.getTime()>=after.getTime())&&(current.getTime()<=before.getTime())) result = true;
+        if (after == null)
+            after = current;
+        if (before == null)
+            before = current;
+        if ((current.getTime() >= after.getTime()) && (current.getTime() <= before.getTime()))
+            result = true;
         return result;
     }
 
@@ -137,7 +144,7 @@ public class LogParser implements IPQuery {
 
         Set<String> ipSet = new HashSet<>();
         for (Record record : setOfLogObjects) {
-            if (isDateFromInterval(record.getDate(),after,before)) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
                 ipSet.add(record.getIpAddress());
             }
         }
@@ -231,7 +238,7 @@ public class LogParser implements IPQuery {
 
         Set<String> ipSet = new HashSet<>();
         for (Record record : setOfLogObjects) {
-            if (isDateFromInterval(record.getDate(),after,before)) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
                 ipSet.add(record.getIpAddress());
             }
         }
@@ -312,7 +319,7 @@ public class LogParser implements IPQuery {
 
         Set<String> ipSet = new HashSet<>();
         for (Record record : setOfLogObjects) {
-            if ((isDateFromInterval(record.getDate(),after,before)) && (user.equals(record.getUserName()))) {
+            if ((isDateFromInterval(record.getDate(), after, before)) && (user.equals(record.getUserName()))) {
                 ipSet.add(record.getIpAddress());
             }
         }
@@ -395,7 +402,7 @@ public class LogParser implements IPQuery {
 
         Set<String> ipSet = new HashSet<>();
         for (Record record : setOfLogObjects) {
-            if ((isDateFromInterval(record.getDate(),after,before)) && (event.equals(record.getEvent()))) {
+            if ((isDateFromInterval(record.getDate(), after, before)) && (event.equals(record.getEvent()))) {
                 ipSet.add(record.getIpAddress());
             }
         }
@@ -482,7 +489,7 @@ public class LogParser implements IPQuery {
 
         Set<String> ipSet = new HashSet<>();
         for (Record record : setOfLogObjects) {
-            if ((isDateFromInterval(record.getDate(),after,before)) && (status.equals(record.getStatus()))) {
+            if ((isDateFromInterval(record.getDate(), after, before)) && (status.equals(record.getStatus()))) {
                 ipSet.add(record.getIpAddress());
             }
         }
@@ -560,5 +567,546 @@ public class LogParser implements IPQuery {
 
         return ipSet;
         */
+    }
+
+    @Override
+    public Set<String> getAllUsers() {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            String userName = record.getUserName();
+            users.add(userName);
+        }
+        return users;
+    }
+
+    @Override
+    public int getNumberOfUsers(Date after, Date before) {
+
+        int usersNumber = 0;
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                String userName = record.getUserName();
+                if (!users.contains(userName)) {
+                    users.add(userName);
+                    usersNumber++;
+                }
+            }
+        }
+        return usersNumber;
+    }
+
+    @Override
+    public int getNumberOfUserEvents(String user, Date after, Date before) {
+
+        int userEventsNumber = 0;
+        Set<Event> eventSet = new HashSet<>();
+
+        for (Record record : setOfLogObjects) {
+            Event event = record.getEvent();
+            String userName = record.getUserName();
+            if (userName.equals(user))
+            {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    eventSet.add(event);
+                    //userEventsNumber++;
+                }
+            }
+        }
+        userEventsNumber = eventSet.size();
+        return userEventsNumber;
+    }
+
+    @Override
+    public Set<String> getUsersForIP(String ip, Date after, Date before) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (ip.equals(record.getIpAddress()))
+            {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getLoggedUsers(Date after, Date before) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                //if (record.getEvent().compareTo(Event.LOGIN) == 0 && record.getStatus().compareTo(Status.OK) == 0)
+                if (record.getEvent().compareTo(Event.LOGIN) == 0)
+                {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getDownloadedPluginUsers(Date after, Date before) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                if (record.getEvent().compareTo(Event.DOWNLOAD_PLUGIN) == 0 && record.getStatus().compareTo(Status.OK) == 0)
+                {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getWroteMessageUsers(Date after, Date before) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                if (record.getEvent().compareTo(Event.WRITE_MESSAGE) == 0 && record.getStatus().compareTo(Status.OK) == 0)
+                {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getSolvedTaskUsers(Date after, Date before) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                //if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0)
+                if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0)
+                {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getSolvedTaskUsers(Date after, Date before, int task) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getTaskNumber() == task) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    //if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0) {
+                    if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0) {
+                        String userName = record.getUserName();
+                        users.add(userName);
+                    }
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getDoneTaskUsers(Date after, Date before) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                //if (record.getEvent().compareTo(Event.DONE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0)
+                if (record.getEvent().compareTo(Event.DONE_TASK) == 0)
+                {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getDoneTaskUsers(Date after, Date before, int task) {
+
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getTaskNumber() == task) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    //if (record.getEvent().compareTo(Event.DONE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0) {
+                    if (record.getEvent().compareTo(Event.DONE_TASK) == 0) {
+                        String userName = record.getUserName();
+                        users.add(userName);
+                    }
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<Date> getDatesForUserAndEvent(String user, Event event, Date after, Date before) {
+
+        Set<Date> dateSet = new HashSet<>();
+        Date date;
+        for (Record record : setOfLogObjects) {
+            String userName = record.getUserName();
+            if (userName.equals(user)) {
+                if (record.getEvent().compareTo(event) == 0) {
+                    date = record.getDate();
+                    if (isDateFromInterval(date, after, before)) {
+                        dateSet.add(date);
+                    }
+                }
+            }
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Date> getDatesWhenSomethingFailed(Date after, Date before) {
+
+        Set<Date> dateSet = new HashSet<>();
+        Date date;
+        Status status;
+        for (Record record : setOfLogObjects) {
+            status = record.getStatus();
+            if (status.compareTo(Status.FAILED) == 0) {
+                date = record.getDate();
+                if (isDateFromInterval(date, after, before)) {
+                    dateSet.add(date);
+                }
+            }
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Date> getDatesWhenErrorHappened(Date after, Date before) {
+
+        Set<Date> dateSet = new HashSet<>();
+        Date date;
+        Status status;
+        for (Record record : setOfLogObjects) {
+            status = record.getStatus();
+            if (status.compareTo(Status.ERROR) == 0) {
+                date = record.getDate();
+                if (isDateFromInterval(date, after, before)) {
+                    dateSet.add(date);
+                }
+            }
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Date getDateWhenUserLoggedFirstTime(String user, Date after, Date before) {
+
+        Date date, minDate = null;
+        Event event;
+        Status status;
+        for (Record record : setOfLogObjects) {
+            String userName = record.getUserName();
+            if (userName.equals(user)) {
+                date = record.getDate();
+                if (isDateFromInterval(date, after, before)) {
+                    event = record.getEvent();
+                    status = record.getStatus();
+                    if (event.compareTo(Event.LOGIN) == 0 && status.compareTo(Status.OK) == 0) {
+                        if (minDate == null) {
+                            minDate = date;
+                        }
+                        else
+                        {
+                            if (date.before(minDate))
+                                minDate = date;
+                        }
+                    }
+                }
+            }
+        }
+        return minDate;
+    }
+
+    @Override
+    public Date getDateWhenUserSolvedTask(String user, int task, Date after, Date before) {
+
+        Date date, minDate = null;
+        Event event;
+        Status status;
+        for (Record record : setOfLogObjects) {
+            String userName = record.getUserName();
+            if (userName.equals(user)) {
+                if (record.getTaskNumber() == task) {
+                    date = record.getDate();
+                    if (isDateFromInterval(date, after, before)) {
+                        event = record.getEvent();
+                        status = record.getStatus();
+                        if (event.compareTo(Event.SOLVE_TASK) == 0) {
+                            if (minDate == null) {
+                                minDate = date;
+                            } else {
+                                if (date.before(minDate))
+                                    minDate = date;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return minDate;
+    }
+
+    @Override
+    public Date getDateWhenUserDoneTask(String user, int task, Date after, Date before) {
+
+        Date date, minDate = null;
+        Event event;
+        Status status;
+        for (Record record : setOfLogObjects) {
+            String userName = record.getUserName();
+            if (userName.equals(user)) {
+                if (record.getTaskNumber() == task) {
+                    date = record.getDate();
+                    if (isDateFromInterval(date, after, before)) {
+                        event = record.getEvent();
+                        status = record.getStatus();
+                        if (event.compareTo(Event.DONE_TASK) == 0) {
+                            if (minDate == null) {
+                                minDate = date;
+                            }
+                            else
+                            {
+                                if (date.before(minDate))
+                                    minDate = date;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return minDate;
+    }
+
+    @Override
+    public Set<Date> getDatesWhenUserWroteMessage(String user, Date after, Date before) {
+
+        Set<Date> dateSet = new HashSet<>();
+        Date date;
+        Event event;
+        Status status;
+        for (Record record : setOfLogObjects) {
+            String userName = record.getUserName();
+            if (userName.equals(user)) {
+                date = record.getDate();
+                if (isDateFromInterval(date, after, before)) {
+                    event = record.getEvent();
+                    status = record.getStatus();
+                    if (event.compareTo(Event.WRITE_MESSAGE) == 0 && status.compareTo(Status.OK) == 0) {
+                        dateSet.add(date);
+                    }
+                }
+            }
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Date> getDatesWhenUserDownloadedPlugin(String user, Date after, Date before) {
+
+        Set<Date> dateSet = new HashSet<>();
+        Date date;
+        Event event;
+        Status status;
+        for (Record record : setOfLogObjects) {
+            String userName = record.getUserName();
+            if (userName.equals(user)) {
+                date = record.getDate();
+                if (isDateFromInterval(date, after, before)) {
+                    event = record.getEvent();
+                    status = record.getStatus();
+                    if (event.compareTo(Event.DOWNLOAD_PLUGIN) == 0 && status.compareTo(Status.OK) == 0) {
+                        dateSet.add(date);
+                    }
+                }
+            }
+        }
+        return dateSet;
+    }
+
+    @Override
+    public int getNumberOfAllEvents(Date after, Date before) {
+        int userEventsNumber = 0;
+        Set<Event> eventSet = new HashSet<>();
+
+        for (Record record : setOfLogObjects) {
+            Event event = record.getEvent();
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                eventSet.add(event);
+            }
+        }
+        userEventsNumber = eventSet.size();
+        return userEventsNumber;
+    }
+
+    @Override
+    public Set<Event> getAllEvents(Date after, Date before) {
+        Set<Event> eventSet = new HashSet<>();
+
+        for (Record record : setOfLogObjects) {
+            Event event = record.getEvent();
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                eventSet.add(event);
+            }
+        }
+        return eventSet;
+    }
+
+    @Override
+    public Set<Event> getEventsForIP(String ip, Date after, Date before) {
+        Set<Event> eventSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            Event event = record.getEvent();
+            if (record.getIpAddress().equals(ip)) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    eventSet.add(event);
+                }
+            }
+        }
+        return eventSet;
+    }
+
+    @Override
+    public Set<Event> getEventsForUser(String user, Date after, Date before) {
+        Set<Event> eventSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            Event event = record.getEvent();
+            if (record.getUserName().equals(user)) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    eventSet.add(event);
+                }
+            }
+        }
+        return eventSet;
+    }
+
+    @Override
+    public Set<Event> getFailedEvents(Date after, Date before) {
+        Set<Event> eventSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            Event event = record.getEvent();
+            Status status = record.getStatus();
+            if (status.compareTo(Status.FAILED) == 0) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    eventSet.add(event);
+                }
+            }
+        }
+        return eventSet;
+    }
+
+    @Override
+    public Set<Event> getErrorEvents(Date after, Date before) {
+        Set<Event> eventSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            Event event = record.getEvent();
+            Status status = record.getStatus();
+            if (status.compareTo(Status.ERROR) == 0) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    eventSet.add(event);
+                }
+            }
+        }
+        return eventSet;
+    }
+
+    @Override
+    public int getNumberOfAttemptToSolveTask(int task, Date after, Date before) {
+        int solveAttempts = 0;
+        for (Record record : setOfLogObjects) {
+            if (record.getTaskNumber() == task) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    Event event = record.getEvent();
+                    if (event.compareTo(Event.SOLVE_TASK) == 0)
+                        solveAttempts++;
+                }
+            }
+        }
+        return solveAttempts;
+    }
+
+    @Override
+    public int getNumberOfSuccessfulAttemptToSolveTask(int task, Date after, Date before) {
+        int successAttempts = 0;
+        for (Record record : setOfLogObjects) {
+            if (record.getTaskNumber() == task) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    Event event = record.getEvent();
+                    Status status = record.getStatus();
+                    if (event.compareTo(Event.DONE_TASK) == 0)
+                        successAttempts++;
+                }
+            }
+        }
+        return successAttempts;
+    }
+
+    @Override
+    public Map<Integer, Integer> getAllSolvedTasksAndTheirNumber(Date after, Date before) {
+
+        Map<Integer, Integer> map = new HashMap<>();
+        Integer task = 0;
+
+        int solveAttempts = 0;
+        for (Record record : setOfLogObjects) {
+            task = record.getTaskNumber();
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                Event event = record.getEvent();
+                if (event.compareTo(Event.SOLVE_TASK) == 0) {
+                    if (map.containsKey(task)) {
+                        solveAttempts = map.get(task);
+                        solveAttempts++;
+                        map.put(task, solveAttempts);
+                    }
+                    else
+                        map.put(task, 1);
+                }
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public Map<Integer, Integer> getAllDoneTasksAndTheirNumber(Date after, Date before) {
+
+        Map<Integer, Integer> map = new HashMap<>();
+        Integer task = 0;
+
+        int successAttempts = 0;
+        for (Record record : setOfLogObjects) {
+            task = record.getTaskNumber();
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                Event event = record.getEvent();
+                Status status = record.getStatus();
+                if (event.compareTo(Event.DONE_TASK) == 0)
+                    if (map.containsKey(task)) {
+                        successAttempts = map.get(task);
+                        successAttempts++;
+                        map.put(task, successAttempts);
+                    }
+                    else
+                        map.put(task, 1);
+            }
+        }
+        return map;
     }
 }
