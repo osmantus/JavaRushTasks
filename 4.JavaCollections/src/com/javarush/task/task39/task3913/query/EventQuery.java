@@ -1,6 +1,7 @@
 package com.javarush.task.task39.task3913.query;
 
 import com.javarush.task.task39.task3913.Event;
+import com.javarush.task.task39.task3913.Status;
 
 import java.util.Date;
 import java.util.Map;
@@ -26,4 +27,12 @@ public interface EventQuery {
     Map<Integer, Integer> getAllSolvedTasksAndTheirNumber(Date after, Date before);
 
     Map<Integer, Integer> getAllDoneTasksAndTheirNumber(Date after, Date before);
+
+    /*Set<Event> getEventsForIP(String ip);
+
+    Set<Event> getEventsForUser(String user);*/
+
+    Set<Event> getEventsForDate(Date date);
+
+    Set<Event> getEventsForStatus(Status status);
 }

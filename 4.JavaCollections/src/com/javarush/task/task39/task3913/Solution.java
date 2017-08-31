@@ -44,5 +44,44 @@ public class Solution {
         System.out.println(logParser.getNumberOfSuccessfulAttemptToSolveTask(15, null, null));
         System.out.println(logParser.getAllSolvedTasksAndTheirNumber(null, null));
         System.out.println(logParser.getAllDoneTasksAndTheirNumber(null, null));
+
+        System.out.println(logParser.execute("get ip"));
+        System.out.println(logParser.execute("get user"));
+        System.out.println(logParser.execute("get date"));
+        System.out.println(logParser.execute("get event"));
+        System.out.println(logParser.execute("get status"));
+
+        System.out.println("1)");
+        System.out.println(logParser.execute("get ip for user = \"Vasya\""));
+        System.out.println(logParser.execute("get ip for date = \"21.10.2021 19:45:25\""));
+        System.out.println(logParser.execute("get ip for event = \"SOLVE_TASK\""));
+        System.out.println(logParser.execute("get ip for status = \"FAILED\""));
+
+        System.out.println("2)");
+        System.out.println(logParser.execute("get user for date = \"19.03.2016 0:00:00\""));
+        System.out.println(logParser.execute("get user for event = \"LOGIN\""));
+        System.out.println(logParser.execute("get user for status = \"ERROR\""));
+        System.out.println(logParser.execute("get user for ip = \"127.0.0.1\""));
+
+        System.out.println("3)");
+        System.out.println(logParser.execute("get date for ip = \"127.0.0.1\""));
+        System.out.println(logParser.execute("get date for user = \"Vasya\""));
+        System.out.println(logParser.execute("get date for event = \"SOLVE_TASK\""));
+        System.out.println(logParser.execute("get date for status = \"OK\""));
+
+        System.out.println("4)");
+        System.out.println(logParser.execute("get event for ip = \"127.0.0.1\""));
+        System.out.println(logParser.execute("get event for user = \"Vasya\""));
+        System.out.println(logParser.execute("get event for date = \"19.03.2016 0:00:00\""));
+        System.out.println(logParser.execute("get event for status = \"OK\""));
+
+        System.out.println("5)");
+        System.out.println(logParser.execute("get status for ip = \"127.0.0.1\""));
+        System.out.println(logParser.execute("get status for user = \"Vasya\""));
+        System.out.println(logParser.execute("get status for date = \"19.03.2016 0:00:00\""));
+        System.out.println(logParser.execute("get status for event = \"SOLVE_TASK\""));
+
+        System.out.println("6)");
+        System.out.println(logParser.execute("get event for date = \"30.01.2014 12:56:22\""));
     }
 }

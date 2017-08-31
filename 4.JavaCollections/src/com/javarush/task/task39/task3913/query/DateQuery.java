@@ -1,6 +1,7 @@
 package com.javarush.task.task39.task3913.query;
 
 import com.javarush.task.task39.task3913.Event;
+import com.javarush.task.task39.task3913.Status;
 
 import java.util.Date;
 import java.util.Set;
@@ -21,4 +22,15 @@ public interface DateQuery {
     Set<Date> getDatesWhenUserWroteMessage(String user, Date after, Date before);
 
     Set<Date> getDatesWhenUserDownloadedPlugin(String user, Date after, Date before);
+
+    Set<Date> getAllUniqueDates();
+
+    Set<Date> getDatesForIP(String ip);
+
+    Set<Date> getDatesForUser(String user);
+
+    Set<Date> getDatesForEvent(Event event);
+
+    Set<Date> getDatesForStatus(Status status);
+
 }

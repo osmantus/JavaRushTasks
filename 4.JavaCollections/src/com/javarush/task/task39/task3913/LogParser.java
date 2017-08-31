@@ -1,9 +1,6 @@
 package com.javarush.task.task39.task3913;
 
-import com.javarush.task.task39.task3913.query.DateQuery;
-import com.javarush.task.task39.task3913.query.EventQuery;
-import com.javarush.task.task39.task3913.query.IPQuery;
-import com.javarush.task.task39.task3913.query.UserQuery;
+import com.javarush.task.task39.task3913.query.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,14 +12,18 @@ import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+//import java.time.LocalDate;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
+public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQuery, StatusQuery {
 
     //private List<Path> logFiles;
     private Path logDir;
     private Set<Record> setOfLogObjects;
+
+    private DateFormat dateTimeFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
     private class Record
     {
@@ -137,6 +138,23 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
         if ((current.getTime() >= after.getTime()) && (current.getTime() <= before.getTime()))
             result = true;
         return result;
+    }
+
+    private List<Record> getLogRecords(String ip, String user, Date date, Event event, Status status, Date from, Date to) {
+        List<Record> logRecords = new ArrayList<>();
+        for (Record logRecord : setOfLogObjects) {
+            int compareAfter = (from != null) ? logRecord.date.compareTo(from) : 1;
+            int compareBefore = (to != null) ? logRecord.date.compareTo(to) : -1;
+            if ((compareAfter >= 0) && (compareBefore <= 0)
+                    && ((ip == null) || logRecord.ipAddress.equals(ip))
+                    && ((user == null) || logRecord.userName.equals(user))
+                    && ((date == null) || (logRecord.date.compareTo(date) == 0))
+                    && ((event == null) || (logRecord.event == event))
+                    && ((status == null) || (logRecord.status == status))) {
+                logRecords.add(logRecord);
+            }
+        }
+        return logRecords;
     }
 
     @Override
@@ -318,9 +336,18 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
     public Set<String> getIPsForUser(String user, Date after, Date before) {
 
         Set<String> ipSet = new HashSet<>();
+        String userName = "";
+        String[] userNameParts = null;
+        List<String> list = null;
         for (Record record : setOfLogObjects) {
-            if ((isDateFromInterval(record.getDate(), after, before)) && (user.equals(record.getUserName()))) {
-                ipSet.add(record.getIpAddress());
+            userName = record.getUserName().replaceAll("\\s", " ");
+            userNameParts = userName.split(" ");
+            list = Arrays.asList(userNameParts);
+            if (list.contains(user)) {
+                //if ((isDateFromInterval(record.getDate(), after, before)) && (user.equals(record.getUserName()))) {
+                if ((isDateFromInterval(record.getDate(), after, before))) {
+                    ipSet.add(record.getIpAddress());
+                }
             }
         }
         return ipSet;
@@ -988,12 +1015,20 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
     @Override
     public Set<Event> getEventsForUser(String user, Date after, Date before) {
         Set<Event> eventSet = new HashSet<>();
+        String userName = "";
+        String[] userNameParts = null;
+        List<String> list = null;
         for (Record record : setOfLogObjects) {
-            Event event = record.getEvent();
-            if (record.getUserName().equals(user)) {
+            userName = record.getUserName().replaceAll("\\s", " ");
+            userNameParts = userName.split(" ");
+            list = Arrays.asList(userNameParts);
+            if (list.contains(user)) {
+                Event event = record.getEvent();
+                //if (record.getUserName().equals(user)) {
                 if (isDateFromInterval(record.getDate(), after, before)) {
                     eventSet.add(event);
                 }
+                //}
             }
         }
         return eventSet;
@@ -1108,5 +1143,458 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery {
             }
         }
         return map;
+    }
+
+    @Override
+    public Set<Date> getAllUniqueDates() {
+        Set<Date> dateSet = new HashSet<>();
+        Date date;
+        for (Record record : setOfLogObjects) {
+            date = record.getDate();
+            dateSet.add(date);
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Status> getAllUniqueStatuses() {
+        Set<Status> statusSet = new HashSet<>();
+        Status status;
+        for (Record record : setOfLogObjects) {
+            status = record.getStatus();
+            statusSet.add(status);
+        }
+        return statusSet;
+    }
+
+
+    @Override
+    public Set<String> getUsersForDate(Date after, Date before) {
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), after, before)) {
+                String userName = record.getUserName();
+                users.add(userName);
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getUsersForEvent(Event event, Date after, Date before) {
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getEvent().compareTo(event) == 0) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<String> getUsersForStatus(Status status, Date after, Date before) {
+        Set<String> users = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getStatus().compareTo(status) == 0) {
+                if (isDateFromInterval(record.getDate(), after, before)) {
+                    String userName = record.getUserName();
+                    users.add(userName);
+                }
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public Set<Date> getDatesForIP(String ip) {
+        Set<Date> dateSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getIpAddress().equals(ip))
+                dateSet.add(record.getDate());
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Date> getDatesForUser(String user) {
+        Set<Date> dateSet = new HashSet<>();
+        String userName = "";
+        String[] userNameParts = null;
+        List<String> list = null;
+        for (Record record : setOfLogObjects) {
+            userName = record.getUserName().replaceAll("\\s", " ");
+            userNameParts = userName.split(" ");
+            list = Arrays.asList(userNameParts);
+            if (list.contains(user)) {
+                //if (record.getUserName().equals(user))
+                dateSet.add(record.getDate());
+            }
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Date> getDatesForEvent(Event event) {
+        Set<Date> dateSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getEvent().compareTo(event) == 0)
+                dateSet.add(record.getDate());
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Date> getDatesForStatus(Status status) {
+        Set<Date> dateSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getStatus().compareTo(status) == 0)
+                dateSet.add(record.getDate());
+        }
+        return dateSet;
+    }
+
+    @Override
+    public Set<Event> getEventsForDate(Date date) {
+        Set<Event> eventSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), date, date)) {
+                eventSet.add(record.getEvent());
+            }
+        }
+        return eventSet;
+    }
+
+    @Override
+    public Set<Event> getEventsForStatus(Status status) {
+        Set<Event> eventSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getStatus().compareTo(status) == 0)
+                eventSet.add(record.getEvent());
+        }
+        return eventSet;
+    }
+
+    @Override
+    public Set<Status> getStatusesForIP(String ip) {
+        Set<Status> statusSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getIpAddress().equals(ip))
+                statusSet.add(record.getStatus());
+        }
+        return statusSet;
+    }
+
+    @Override
+    public Set<Status> getStatusesForUser(String user) {
+        Set<Status> statusSet = new HashSet<>();
+        String userName = "";
+        String[] userNameParts = null;
+        List<String> list = null;
+        for (Record record : setOfLogObjects) {
+            userName = record.getUserName().replaceAll("\\s", " ");
+            userNameParts = userName.split(" ");
+            list = Arrays.asList(userNameParts);
+            if (list.contains(user)) {
+                //if (record.getUserName().equals(user))
+                statusSet.add(record.getStatus());
+            }
+        }
+        return statusSet;
+    }
+
+    @Override
+    public Set<Status> getStatusesForDate(Date date) {
+        Set<Status> statusSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (isDateFromInterval(record.getDate(), date, date)) {
+                statusSet.add(record.getStatus());
+            }
+        }
+        return statusSet;
+    }
+
+    @Override
+    public Set<Status> getStatusesForEvent(Event event) {
+        Set<Status> statusSet = new HashSet<>();
+        for (Record record : setOfLogObjects) {
+            if (record.getEvent().compareTo(event) == 0)
+                statusSet.add(record.getStatus());
+        }
+        return statusSet;
+    }
+
+
+    @Override
+    public Set<Object> execute(String query) {
+
+        if (query == null) return null;
+
+        Set<?> objectSet = new HashSet<>();
+        String value = "";
+
+        query = query.replaceAll("\\s+", " ");
+
+        String[] strArray = null;
+        if (query.contains(" "))
+        {
+            strArray = query.split(" ");
+            if (strArray.length == 2)
+            {
+                if (strArray[0].equals("get"))
+                {
+                    switch (strArray[1])
+                    {
+                        case "ip":
+                            objectSet = getUniqueIPs(null, null);
+                            break;
+
+                        case "user":
+                            objectSet = getAllUsers();
+                            break;
+
+                        case "date":
+                            objectSet = getAllUniqueDates();
+                            break;
+
+                        case "event":
+                            objectSet = getAllEvents(null, null);
+                            break;
+
+                        case "status":
+                            objectSet = getAllUniqueStatuses();
+                            break;
+                    }
+                }
+            }
+            else if (strArray.length == 6 || strArray.length == 7)
+            {
+                if (strArray[2].equals("for") && strArray[4].equals("=") &&
+                        ((strArray.length == 6 && strArray[5].startsWith("\"") && strArray[5].endsWith("\"")) ||
+                                (strArray.length == 7 && strArray[5].startsWith("\"") && strArray[6].endsWith("\"")))) {
+
+                    if (strArray.length == 6)
+                        value = strArray[5].substring(1, strArray[5].length()-1);
+                    else {
+                        value = strArray[5].substring(1, strArray[5].length()) + " " + strArray[6].substring(0, strArray[6].length()-1);
+                    }
+
+                    switch (strArray[1]) {
+                        case "ip":
+                            switch (strArray[3])
+                            {
+                                case "user":
+                                    objectSet = getIPsForUser(value, null, null);
+                                    break;
+
+                                case "date":
+                                    Date date = getDateFromStr(value);
+                                    objectSet = getUniqueIPs(date, date);
+                                    break;
+
+                                case "event":
+                                    objectSet = getIPsForEvent(Event.valueOf(value), null, null);
+                                    break;
+
+                                case "status":
+                                    objectSet = getIPsForStatus(Status.valueOf(value), null, null);
+                                    break;
+                            }
+                            break;
+
+                        case "user":
+                            switch (strArray[3])
+                            {
+                                case "ip":
+                                    objectSet = getUsersForIP(value, null, null);
+                                    break;
+
+                                case "date":
+                                    Date date = getDateFromStr(value);
+                                    objectSet = getUsersForDate(date, date);
+                                    break;
+
+                                case "event":
+                                    objectSet = getUsersForEvent(Event.valueOf(value), null, null);
+                                    break;
+
+                                case "status":
+                                    objectSet = getUsersForStatus(Status.valueOf(value), null, null);
+                                    break;
+                            }
+                            break;
+
+                        case "date":
+                            switch (strArray[3])
+                            {
+                                case "ip":
+                                    objectSet = getDatesForIP(value);
+                                    break;
+
+                                case "user":
+                                    objectSet = getDatesForUser(value);
+                                    break;
+
+                                case "event":
+                                    objectSet = getDatesForEvent(Event.valueOf(value));
+                                    break;
+
+                                case "status":
+                                    objectSet = getDatesForStatus(Status.valueOf(value));
+                                    break;
+                            }
+                            break;
+
+                        case "event":
+                            switch (strArray[3])
+                            {
+                                case "ip":
+                                    objectSet = getEventsForIP(value, null, null);
+                                    break;
+
+                                case "user":
+                                    objectSet = getEventsForUser(value, null, null);
+                                    break;
+
+                                case "date":
+                                    Date date = getDateFromStr(value);
+                                    objectSet = getEventsForDate(date);
+                                    break;
+
+                                case "status":
+                                    objectSet = getEventsForStatus(Status.valueOf(value));
+                                    break;
+                            }
+                            break;
+
+                        case "status":
+                            switch (strArray[3])
+                            {
+                                case "ip":
+                                    objectSet = getStatusesForIP(value);
+                                    break;
+
+                                case "user":
+                                    objectSet = getStatusesForUser(value);
+                                    break;
+
+                                case "date":
+                                    Date date = getDateFromStr(value);
+                                    objectSet = getStatusesForDate(date);
+                                    break;
+
+                                case "event":
+                                    objectSet = getStatusesForEvent(Event.valueOf(value));
+                                    break;
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+
+        if (objectSet == null)
+            return null;
+        else
+            return (Set<Object>) objectSet;
+
+
+
+/*
+        if (query == null) return null;
+        Set<Object> resultSet = new HashSet<>();
+
+        Pattern QUERY_PATTERN = Pattern.compile("^get\\s+(\\w+)(\\s*for?\\s*(\\w+)\\s*=\\s*\\\"(([\\w А-Яа-я]+)|(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2})|(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}))\\\"(\\s+and\\s+date\\s+between\\s+\\\"(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2})\\\"\\s+and\\s+\\\"(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2})\\\")?)?$");
+        Matcher m = QUERY_PATTERN.matcher(query);
+        if (m.find()) {
+            String object = m.group(1);
+            String param = m.group(3);
+            String value = m.group(4);
+            String from = m.group(9);
+            String to = m.group(10);
+            boolean isBetween = (m.group(8) != null);
+
+            String valIP = null;
+            String valUser = null;
+            Date valDate = null;
+            Event valEvent = null;
+            Status valStatus = null;
+
+            Date valTo = null;
+            Date valFrom = null;
+
+            if (isBetween) {
+                try {
+                    valFrom = dateTimeFormat.parse(from);
+                    valTo = dateTimeFormat.parse(to);
+                } catch (ParseException ignored) {
+                }
+            }
+
+            if (param != null) {
+                switch (param) {
+                    case "ip":
+                        valIP = value;
+                        break;
+                    case "user":
+                        valUser = value;
+                        break;
+                    case "date":
+                        try {
+                            valDate = dateTimeFormat.parse(value);
+                        } catch (ParseException ignored) {
+                        }
+                        break;
+                    case "event":
+                        valEvent = Event.valueOf(value);
+                        break;
+                    case "status":
+                        valStatus = Status.valueOf(value);
+                        break;
+                    default:
+                        System.err.println("Unexpected parameter: " + param);
+                }
+            }
+
+            for (Record logRecord : getLogRecords(valIP, valUser, valDate, valEvent, valStatus, valFrom, valTo)) {
+                switch (object) {
+                    case "ip":
+                        resultSet.add(logRecord.ipAddress);
+                        break;
+                    case "user":
+                        resultSet.add(logRecord.userName);
+                        break;
+                    case "date":
+                        resultSet.add(logRecord.date);
+                        break;
+                    case "event":
+                        resultSet.add(logRecord.event);
+                        break;
+                    case "status":
+                        resultSet.add(logRecord.status);
+                        break;
+                    default:
+                        System.err.println("Unexpected object: " + object);
+                }
+            }
+        } else {
+            System.err.println("Could not parse query: " + query);
+        }
+        return resultSet;
+*/
+    }
+
+    private Date getDateFromStr(String str)
+    {
+        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.ENGLISH);
+        Date date = null;
+        try {
+            date = dateFormat.parse(str);
+        } catch (ParseException e) {
+            //e.printStackTrace();
+        }
+        return date;
     }
 }

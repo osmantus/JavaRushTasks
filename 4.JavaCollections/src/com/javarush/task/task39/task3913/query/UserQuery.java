@@ -1,5 +1,8 @@
 package com.javarush.task.task39.task3913.query;
 
+import com.javarush.task.task39.task3913.Event;
+import com.javarush.task.task39.task3913.Status;
+
 import java.util.Date;
 import java.util.Set;
 
@@ -25,4 +28,10 @@ public interface UserQuery {
     Set<String> getDoneTaskUsers(Date after, Date before);
 
     Set<String> getDoneTaskUsers(Date after, Date before, int task);
+
+    Set<String> getUsersForDate(Date after, Date before);
+
+    Set<String> getUsersForEvent(Event event, Date after, Date before);
+
+    Set<String> getUsersForStatus(Status status, Date after, Date before);
 }
