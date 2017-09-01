@@ -28,9 +28,9 @@ public interface EventQuery {
 
     Map<Integer, Integer> getAllDoneTasksAndTheirNumber(Date after, Date before);
 
-    /*Set<Event> getEventsForIP(String ip);
+    //Set<Event> getEventsForIP(String ip);
 
-    Set<Event> getEventsForUser(String user);*/
+    //Set<Event> getEventsForUser(String user);
 
     Set<Event> getEventsForDate(Date date);
 

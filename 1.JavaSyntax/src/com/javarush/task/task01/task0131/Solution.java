@@ -11,5 +11,6 @@ public class Solution {
 
     public static int getMetreFromCentimetre(int centimetre) {
         //напишите тут ваш код
+        return 0;
     }
 }

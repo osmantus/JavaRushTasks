@@ -5,21 +5,18 @@ import com.javarush.task.task39.task3913.query.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-//import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQuery, StatusQuery {
 
-    //private List<Path> logFiles;
     private Path logDir;
     private Set<Record> setOfLogObjects;
 
@@ -92,17 +89,15 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
         }
         return result;
     }
-    // разбор строк в объекты Record
+
     private Set<Record> parseStringsToRecordObjects(List<String> listOfLogStrings){
         Set<Record> result = new HashSet<>();
         for (String recordString : listOfLogStrings) {
             String[] recordStringArray = recordString.split("\\t");
             Record record = new Record();
-            // ip адрес
+
             record.setIpAddress(recordStringArray[0]);
-            // имя пользователя
             record.setUserName(recordStringArray[1]);
-            // дата
             DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.ENGLISH);
             try {
                 Date date = dateFormat.parse(recordStringArray[2]);
@@ -110,25 +105,20 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            // event
             record.setEvent(Event.valueOf(recordStringArray[3].split("\\s")[0])) ;
-            // номер задачи
-            if (recordStringArray[3].split("\\s").length>1){
+            if (recordStringArray[3].split("\\s").length > 1){
                 record.setTaskNumber(Integer.parseInt(recordStringArray[3].split("\\s")[1]));
             }
-            // status
             record.setStatus(Status.valueOf(recordStringArray[4]));
-            // добавление записи в список
             result.add(record);
         }
         return result;
     }
-    // конструктор
+
     public LogParser(Path logDir){
         this.setOfLogObjects = parseStringsToRecordObjects(readLogFiles(logDir));
     }
 
-    // проверка, попадает ли дата в интервал
     private boolean isDateFromInterval(Date current, Date after, Date before){
         boolean result = false;
         if (after == null)
@@ -167,88 +157,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             }
         }
         return ipSet.size();
-
-        /*List<Path> logFiles = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
-            for (Path entry: stream) {
-                logFiles.add(entry);
-            }
-        } catch (DirectoryIteratorException ex) {
-            ex.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (logFiles.size() == 0)
-            return 0;
-
-        String filePath;
-        String line;
-        String[] fields;
-        String ip;
-        String dateTime;
-        Date parsedDate;
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-        int result = 0;
-
-        Set<String> ipSet = new HashSet<>();
-
-        for (Path path : logFiles) {
-            if (!path.toString().equals(""))
-            {
-                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
-                {
-                    while (reader.ready()) {
-                        line = reader.readLine();
-                        fields = line.split("\t");
-                        if (!fields[0].trim().equals(""))
-                        {
-                            ip = fields[0];
-                            dateTime = fields[2];
-
-                            parsedDate = formatter.parse(dateTime);
-
-                            if (after != null && before != null) {
-                                if (parsedDate.after(after) && parsedDate.before(before)) {
-                                    if (!ipSet.contains(ip)) {
-                                        ipSet.add(ip);
-                                        result++;
-                                    }
-                                }
-                            }
-                            else if (after != null)
-                            {
-                                if (parsedDate.after(after)) {
-                                    if (!ipSet.contains(ip)) {
-                                        ipSet.add(ip);
-                                        result++;
-                                    }
-                                }
-                            }
-                            else if (before != null)
-                            {
-                                if (parsedDate.before(before)) {
-                                    if (!ipSet.contains(ip)) {
-                                        ipSet.add(ip);
-                                        result++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return result;
-        */
     }
 
     @Override
@@ -261,75 +169,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             }
         }
         return ipSet;
-
-        /*List<Path> logFiles = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
-            for (Path entry: stream) {
-                logFiles.add(entry);
-            }
-        } catch (DirectoryIteratorException ex) {
-            ex.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (logFiles.size() == 0)
-            return null;
-
-        String filePath;
-        String line;
-        String[] fields;
-        String ip;
-        String dateTime;
-        Date parsedDate;
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-        int result = 0;
-
-        Set<String> ipSet = new HashSet<>();
-
-        for (Path path : logFiles) {
-            if (!path.toString().equals(""))
-            {
-                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
-                {
-                    while (reader.ready()) {
-                        line = reader.readLine();
-                        fields = line.split("\t");
-                        if (!fields[0].trim().equals(""))
-                        {
-                            ip = fields[0];
-                            dateTime = fields[2];
-
-                            parsedDate = formatter.parse(dateTime);
-
-                            if (after != null && before != null) {
-                                if (parsedDate.after(after) && parsedDate.before(before))
-                                    ipSet.add(ip);
-                            }
-                            else if (after != null) {
-                                if (parsedDate.after(after))
-                                    ipSet.add(ip);
-                            }
-                            else if (before != null)
-                            {
-                                if (parsedDate.before(before))
-                                    ipSet.add(ip);
-                            }
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return ipSet;
-        */
     }
 
     @Override
@@ -344,84 +183,12 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             userNameParts = userName.split(" ");
             list = Arrays.asList(userNameParts);
             if (list.contains(user)) {
-                //if ((isDateFromInterval(record.getDate(), after, before)) && (user.equals(record.getUserName()))) {
                 if ((isDateFromInterval(record.getDate(), after, before))) {
                     ipSet.add(record.getIpAddress());
                 }
             }
         }
         return ipSet;
-
-        /*List<Path> logFiles = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
-            for (Path entry: stream) {
-                logFiles.add(entry);
-            }
-        } catch (DirectoryIteratorException ex) {
-            ex.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (logFiles.size() == 0)
-            return null;
-
-        String filePath;
-        String line;
-        String[] fields;
-        String ip;
-        String dateTime;
-        String userName;
-
-        Date parsedDate;
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-        int result = 0;
-
-        Set<String> ipSet = new HashSet<>();
-
-        for (Path path : logFiles) {
-            if (!path.toString().equals(""))
-            {
-                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
-                {
-                    while (reader.ready()) {
-                        line = reader.readLine();
-                        fields = line.split("\t");
-                        if (!fields[0].trim().equals(""))
-                        {
-                            ip = fields[0];
-                            dateTime = fields[2];
-                            userName = fields[1];
-
-                            if (userName.equals(user)) {
-                                parsedDate = formatter.parse(dateTime);
-
-                                if (after != null && before != null) {
-                                    if (parsedDate.after(after) && parsedDate.before(before))
-                                        ipSet.add(ip);
-                                } else if (after != null) {
-                                    if (parsedDate.after(after))
-                                        ipSet.add(ip);
-                                } else if (before != null) {
-                                    if (parsedDate.before(before))
-                                        ipSet.add(ip);
-                                }
-                            }
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return ipSet;
-        */
     }
 
     @Override
@@ -434,81 +201,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             }
         }
         return ipSet;
-
-        /*List<Path> logFiles = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
-            for (Path entry: stream) {
-                logFiles.add(entry);
-            }
-        } catch (DirectoryIteratorException ex) {
-            ex.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (logFiles.size() == 0)
-            return null;
-
-        String filePath;
-        String line;
-        String[] fields;
-        String ip;
-        String dateTime;
-        String eventStr;
-        Event eventVar;
-
-        Date parsedDate;
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-        int result = 0;
-
-        Set<String> ipSet = new HashSet<>();
-
-        for (Path path : logFiles) {
-            if (!path.toString().equals(""))
-            {
-                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
-                {
-                    while (reader.ready()) {
-                        line = reader.readLine();
-                        fields = line.split("\t");
-                        if (!fields[0].trim().equals(""))
-                        {
-                            ip = fields[0];
-                            dateTime = fields[2];
-                            eventStr = fields[3].trim();
-                            if (eventStr.contains(" "))
-                                eventStr = eventStr.split(" ")[0];
-                            eventVar = Event.valueOf(eventStr);
-
-                            if (eventVar.name().equals(event.name())) {
-                                parsedDate = formatter.parse(dateTime);
-
-                                if (after != null && before != null) {
-                                    if (parsedDate.after(after) && parsedDate.before(before))
-                                        ipSet.add(ip);
-                                } else if (after != null) {
-                                    if (parsedDate.after(after))
-                                        ipSet.add(ip);
-                                } else if (before != null) {
-                                    if (parsedDate.before(before))
-                                        ipSet.add(ip);
-                                }
-                            }
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return ipSet;
-        */
     }
 
     @Override
@@ -521,79 +213,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             }
         }
         return ipSet;
-
-        /*List<Path> logFiles = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDir, "*.{log}")) {
-            for (Path entry: stream) {
-                logFiles.add(entry);
-            }
-        } catch (DirectoryIteratorException ex) {
-            ex.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (logFiles.size() == 0)
-            return null;
-
-        String filePath;
-        String line;
-        String[] fields;
-        String ip;
-        String dateTime;
-        String statusStr;
-        Status statusVar;
-
-        Date parsedDate;
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-        int result = 0;
-
-        Set<String> ipSet = new HashSet<>();
-
-        for (Path path : logFiles) {
-            if (!path.toString().equals(""))
-            {
-                try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8))
-                {
-                    while (reader.ready()) {
-                        line = reader.readLine();
-                        fields = line.split("\t");
-                        if (!fields[0].trim().equals(""))
-                        {
-                            ip = fields[0];
-                            dateTime = fields[2];
-                            statusStr = fields[4].trim();
-                            statusVar = Status.valueOf(statusStr);
-
-                            if (statusVar.name().equals(status.name())) {
-                                parsedDate = formatter.parse(dateTime);
-
-                                if (after != null && before != null) {
-                                    if (parsedDate.after(after) && parsedDate.before(before))
-                                        ipSet.add(ip);
-                                } else if (after != null) {
-                                    if (parsedDate.after(after))
-                                        ipSet.add(ip);
-                                } else if (before != null) {
-                                    if (parsedDate.before(before))
-                                        ipSet.add(ip);
-                                }
-                            }
-                        }
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return ipSet;
-        */
     }
 
     @Override
@@ -637,7 +256,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             {
                 if (isDateFromInterval(record.getDate(), after, before)) {
                     eventSet.add(event);
-                    //userEventsNumber++;
                 }
             }
         }
@@ -667,7 +285,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
         Set<String> users = new HashSet<>();
         for (Record record : setOfLogObjects) {
             if (isDateFromInterval(record.getDate(), after, before)) {
-                //if (record.getEvent().compareTo(Event.LOGIN) == 0 && record.getStatus().compareTo(Status.OK) == 0)
                 if (record.getEvent().compareTo(Event.LOGIN) == 0)
                 {
                     String userName = record.getUserName();
@@ -716,7 +333,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
         Set<String> users = new HashSet<>();
         for (Record record : setOfLogObjects) {
             if (isDateFromInterval(record.getDate(), after, before)) {
-                //if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0)
                 if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0)
                 {
                     String userName = record.getUserName();
@@ -734,7 +350,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
         for (Record record : setOfLogObjects) {
             if (record.getTaskNumber() == task) {
                 if (isDateFromInterval(record.getDate(), after, before)) {
-                    //if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0) {
                     if (record.getEvent().compareTo(Event.SOLVE_TASK) == 0) {
                         String userName = record.getUserName();
                         users.add(userName);
@@ -751,7 +366,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
         Set<String> users = new HashSet<>();
         for (Record record : setOfLogObjects) {
             if (isDateFromInterval(record.getDate(), after, before)) {
-                //if (record.getEvent().compareTo(Event.DONE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0)
                 if (record.getEvent().compareTo(Event.DONE_TASK) == 0)
                 {
                     String userName = record.getUserName();
@@ -769,7 +383,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
         for (Record record : setOfLogObjects) {
             if (record.getTaskNumber() == task) {
                 if (isDateFromInterval(record.getDate(), after, before)) {
-                    //if (record.getEvent().compareTo(Event.DONE_TASK) == 0 && record.getStatus().compareTo(Status.OK) == 0) {
                     if (record.getEvent().compareTo(Event.DONE_TASK) == 0) {
                         String userName = record.getUserName();
                         users.add(userName);
@@ -1024,11 +637,9 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             list = Arrays.asList(userNameParts);
             if (list.contains(user)) {
                 Event event = record.getEvent();
-                //if (record.getUserName().equals(user)) {
                 if (isDateFromInterval(record.getDate(), after, before)) {
                     eventSet.add(event);
                 }
-                //}
             }
         }
         return eventSet;
@@ -1229,7 +840,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             userNameParts = userName.split(" ");
             list = Arrays.asList(userNameParts);
             if (list.contains(user)) {
-                //if (record.getUserName().equals(user))
                 dateSet.add(record.getDate());
             }
         }
@@ -1298,7 +908,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
             userNameParts = userName.split(" ");
             list = Arrays.asList(userNameParts);
             if (list.contains(user)) {
-                //if (record.getUserName().equals(user))
                 statusSet.add(record.getStatus());
             }
         }
@@ -1381,115 +990,112 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
                         value = strArray[5].substring(1, strArray[5].length()) + " " + strArray[6].substring(0, strArray[6].length()-1);
                     }
 
-                    switch (strArray[1]) {
-                        case "ip":
-                            switch (strArray[3])
-                            {
-                                case "user":
-                                    objectSet = getIPsForUser(value, null, null);
-                                    break;
+                    if (!value.equals("")) {
+                        switch (strArray[1]) {
+                            case "ip":
+                                switch (strArray[3]) {
+                                    case "user":
+                                        objectSet = getIPsForUser(value, null, null);
+                                        break;
 
-                                case "date":
-                                    Date date = getDateFromStr(value);
-                                    objectSet = getUniqueIPs(date, date);
-                                    break;
+                                    case "date":
+                                        Date date = getDateFromStr(value);
+                                        objectSet = getUniqueIPs(date, date);
+                                        break;
 
-                                case "event":
-                                    objectSet = getIPsForEvent(Event.valueOf(value), null, null);
-                                    break;
+                                    case "event":
+                                        objectSet = getIPsForEvent(Event.valueOf(value), null, null);
+                                        break;
 
-                                case "status":
-                                    objectSet = getIPsForStatus(Status.valueOf(value), null, null);
-                                    break;
-                            }
-                            break;
+                                    case "status":
+                                        objectSet = getIPsForStatus(Status.valueOf(value), null, null);
+                                        break;
+                                }
+                                break;
 
-                        case "user":
-                            switch (strArray[3])
-                            {
-                                case "ip":
-                                    objectSet = getUsersForIP(value, null, null);
-                                    break;
+                            case "user":
+                                switch (strArray[3]) {
+                                    case "ip":
+                                        objectSet = getUsersForIP(value, null, null);
+                                        break;
 
-                                case "date":
-                                    Date date = getDateFromStr(value);
-                                    objectSet = getUsersForDate(date, date);
-                                    break;
+                                    case "date":
+                                        Date date = getDateFromStr(value);
+                                        objectSet = getUsersForDate(date, date);
+                                        break;
 
-                                case "event":
-                                    objectSet = getUsersForEvent(Event.valueOf(value), null, null);
-                                    break;
+                                    case "event":
+                                        objectSet = getUsersForEvent(Event.valueOf(value), null, null);
+                                        break;
 
-                                case "status":
-                                    objectSet = getUsersForStatus(Status.valueOf(value), null, null);
-                                    break;
-                            }
-                            break;
+                                    case "status":
+                                        objectSet = getUsersForStatus(Status.valueOf(value), null, null);
+                                        break;
+                                }
+                                break;
 
-                        case "date":
-                            switch (strArray[3])
-                            {
-                                case "ip":
-                                    objectSet = getDatesForIP(value);
-                                    break;
+                            case "date":
+                                switch (strArray[3]) {
+                                    case "ip":
+                                        objectSet = getDatesForIP(value);
+                                        break;
 
-                                case "user":
-                                    objectSet = getDatesForUser(value);
-                                    break;
+                                    case "user":
+                                        objectSet = getDatesForUser(value);
+                                        break;
 
-                                case "event":
-                                    objectSet = getDatesForEvent(Event.valueOf(value));
-                                    break;
+                                    case "event":
+                                        objectSet = getDatesForEvent(Event.valueOf(value));
+                                        break;
 
-                                case "status":
-                                    objectSet = getDatesForStatus(Status.valueOf(value));
-                                    break;
-                            }
-                            break;
+                                    case "status":
+                                        objectSet = getDatesForStatus(Status.valueOf(value));
+                                        break;
+                                }
+                                break;
 
-                        case "event":
-                            switch (strArray[3])
-                            {
-                                case "ip":
-                                    objectSet = getEventsForIP(value, null, null);
-                                    break;
+                            case "event":
+                                switch (strArray[3]) {
+                                    case "ip":
+                                        objectSet = getEventsForIP(value, null, null);
+                                        break;
 
-                                case "user":
-                                    objectSet = getEventsForUser(value, null, null);
-                                    break;
+                                    case "user":
+                                        objectSet = getEventsForUser(value, null, null);
+                                        break;
 
-                                case "date":
-                                    Date date = getDateFromStr(value);
-                                    objectSet = getEventsForDate(date);
-                                    break;
+                                    case "date":
+                                        Date date = getDateFromStr(value);
+                                        objectSet = getEventsForDate(date);
+                                        break;
 
-                                case "status":
-                                    objectSet = getEventsForStatus(Status.valueOf(value));
-                                    break;
-                            }
-                            break;
+                                    case "status":
+                                        objectSet = getEventsForStatus(Status.valueOf(value));
+                                        break;
+                                }
+                                break;
 
-                        case "status":
-                            switch (strArray[3])
-                            {
-                                case "ip":
-                                    objectSet = getStatusesForIP(value);
-                                    break;
+                            case "status":
+                                switch (strArray[3]) {
+                                    case "ip":
+                                        objectSet = getStatusesForIP(value);
+                                        break;
 
-                                case "user":
-                                    objectSet = getStatusesForUser(value);
-                                    break;
+                                    case "user":
+                                        objectSet = getStatusesForUser(value);
+                                        break;
 
-                                case "date":
-                                    Date date = getDateFromStr(value);
-                                    objectSet = getStatusesForDate(date);
-                                    break;
+                                    case "date":
+                                        Date date = getDateFromStr(value);
+                                        objectSet = getStatusesForDate(date);
+                                        break;
 
-                                case "event":
-                                    objectSet = getStatusesForEvent(Event.valueOf(value));
-                                    break;
-                            }
-                            break;
+                                    case "event":
+                                        objectSet = getStatusesForEvent(Event.valueOf(value));
+                                        break;
+                                }
+                                break;
+                        }
                     }
                 }
             }
@@ -1497,93 +1103,12 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
 
         if (objectSet == null)
             return null;
-        else
-            return (Set<Object>) objectSet;
-
-
-
-/*
-        if (query == null) return null;
-        Set<Object> resultSet = new HashSet<>();
-
-        Pattern QUERY_PATTERN = Pattern.compile("^get\\s+(\\w+)(\\s*for?\\s*(\\w+)\\s*=\\s*\\\"(([\\w А-Яа-я]+)|(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2})|(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}))\\\"(\\s+and\\s+date\\s+between\\s+\\\"(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2})\\\"\\s+and\\s+\\\"(\\d{2}\\.\\d{2}\\.\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2})\\\")?)?$");
-        Matcher m = QUERY_PATTERN.matcher(query);
-        if (m.find()) {
-            String object = m.group(1);
-            String param = m.group(3);
-            String value = m.group(4);
-            String from = m.group(9);
-            String to = m.group(10);
-            boolean isBetween = (m.group(8) != null);
-
-            String valIP = null;
-            String valUser = null;
-            Date valDate = null;
-            Event valEvent = null;
-            Status valStatus = null;
-
-            Date valTo = null;
-            Date valFrom = null;
-
-            if (isBetween) {
-                try {
-                    valFrom = dateTimeFormat.parse(from);
-                    valTo = dateTimeFormat.parse(to);
-                } catch (ParseException ignored) {
-                }
-            }
-
-            if (param != null) {
-                switch (param) {
-                    case "ip":
-                        valIP = value;
-                        break;
-                    case "user":
-                        valUser = value;
-                        break;
-                    case "date":
-                        try {
-                            valDate = dateTimeFormat.parse(value);
-                        } catch (ParseException ignored) {
-                        }
-                        break;
-                    case "event":
-                        valEvent = Event.valueOf(value);
-                        break;
-                    case "status":
-                        valStatus = Status.valueOf(value);
-                        break;
-                    default:
-                        System.err.println("Unexpected parameter: " + param);
-                }
-            }
-
-            for (Record logRecord : getLogRecords(valIP, valUser, valDate, valEvent, valStatus, valFrom, valTo)) {
-                switch (object) {
-                    case "ip":
-                        resultSet.add(logRecord.ipAddress);
-                        break;
-                    case "user":
-                        resultSet.add(logRecord.userName);
-                        break;
-                    case "date":
-                        resultSet.add(logRecord.date);
-                        break;
-                    case "event":
-                        resultSet.add(logRecord.event);
-                        break;
-                    case "status":
-                        resultSet.add(logRecord.status);
-                        break;
-                    default:
-                        System.err.println("Unexpected object: " + object);
-                }
-            }
-        } else {
-            System.err.println("Could not parse query: " + query);
+        else {
+            if (objectSet.isEmpty())
+                return null;
+            else
+                return (Set<Object>) objectSet;
         }
-        return resultSet;
-*/
     }
 
     private Date getDateFromStr(String str)
@@ -1593,7 +1118,6 @@ public class LogParser implements IPQuery, UserQuery, DateQuery, EventQuery, QLQ
         try {
             date = dateFormat.parse(str);
         } catch (ParseException e) {
-            //e.printStackTrace();
         }
         return date;
     }
