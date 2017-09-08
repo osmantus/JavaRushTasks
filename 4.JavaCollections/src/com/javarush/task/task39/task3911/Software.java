@@ -23,6 +23,21 @@ public class Software {
     }
 
     public boolean rollback(int rollbackVersion) {
-        return true;
+
+        if (versionHistoryMap.containsKey(rollbackVersion)) {
+            Map<Integer, String> copyMap = new LinkedHashMap<>();
+
+            copyMap.putAll(versionHistoryMap);
+
+            for (Map.Entry<Integer, String> entry : copyMap.entrySet()) {
+                if (entry.getKey() > rollbackVersion)
+                    versionHistoryMap.remove(entry.getKey());
+            }
+            currentVersion = rollbackVersion;
+
+            return true;
+        }
+        else
+            return false;
     }
 }

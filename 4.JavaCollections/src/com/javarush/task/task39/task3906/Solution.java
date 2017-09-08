@@ -10,5 +10,11 @@ public class Solution {
 
         electricPowerSwitch.press();
         electricPowerSwitch.press();
+
+        LightBulb lightBulb = new LightBulb();
+        ElectricPowerSwitch electricPowerSwitch1 = new ElectricPowerSwitch(lightBulb);
+
+        electricPowerSwitch1.press();
+        electricPowerSwitch1.press();
     }
 }
